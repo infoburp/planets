@@ -46,7 +46,7 @@ while (balls.length<n){
     balls.forEach(function(other_ball){
     		distance = Math.sqrt(
 						((new_ball.x - other_ball.x) * (new_ball.x - other_ball.x)) +
-					U	((new_ball.y - other_ball.y) * (new_ball.y - other_ball.y))
+						((new_ball.y - other_ball.y) * (new_ball.y - other_ball.y))
 					);
 					if (distance < new_ball.radius + other_ball.radius)
 						count++
