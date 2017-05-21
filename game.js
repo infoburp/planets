@@ -33,10 +33,10 @@ var radius = 16;
 var ballvelx = 8;
 var ballvely = 8;
 var pad = 16;
-var n = 64;
+var n = 2;
 var balls = new Array();
 while (balls.length<n){
-	var new_radius = Math.random()*radius+1;
+	var new_radius = Math.random()*radius+8;
 	new_x = Math.floor((Math.random()*width));
 	new_y = Math.floor((Math.random()*height));
 	new_xvel = 0;//(Math.random() * 100) / (new_radius * 4);
@@ -46,7 +46,7 @@ while (balls.length<n){
     balls.forEach(function(other_ball){
     		distance = Math.sqrt(
 						((new_ball.x - other_ball.x) * (new_ball.x - other_ball.x)) +
-						((new_ball.y - other_ball.y) * (new_ball.y - other_ball.y))
+					U	((new_ball.y - other_ball.y) * (new_ball.y - other_ball.y))
 					);
 					if (distance < new_ball.radius + other_ball.radius)
 						count++
