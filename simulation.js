@@ -40,7 +40,7 @@ $(function(){
             var planet = new Planet(
                 Math.random() * (context.canvas.width-50) + 25,
                 Math.random() * (context.canvas.height-50) + 25,
-                Math.random() * 2 + 3
+                1/*Math.random() * 2 + 3*/
             );
             var collides = false;
             for(var i=0, l=planets.length; i<l; i++){
@@ -152,7 +152,7 @@ $(function(){
         }
         function draw(){
             context.clearRect(0, 0, width, height);
-            context.strokeStyle = 'rgba(0, 0, 0, 0.5)';
+            context.strokeStyle = 'rgba(255, 255, 255, 1.0)';
             context.fillStyle = 'rgba(234, 151, 43, 1.0)';
             for(var i=0, l=planets.length; i<l; i++){
                 planets[i].draw(context);
@@ -175,6 +175,19 @@ $(function(){
                 }
             }
         }
+        function blackhole(){
+            for(i=0;i<planets.length;i++){
+            //gravity interaction
+                distance = Math.round(distanceBetween(planets[i].x,planets[i].y,canvas.width/2,canvas.height/2)*100)/100 + 100;
+                gravityConst = planets[i].mass * planets[i].mass/(distance * distance);
+                newGvecx = canvas.width/2 - planets[i].x;
+                newGvecy = canvas.height/2 - planets[i].y;
+                deltaGvecx = setToFixedVelocity(newGvecx ,newGvecy, gravityConst).x;
+                deltaGvecy = setToFixedVelocity(newGvecx ,newGvecy, gravityConst).y;
+                planets[i].ax += deltaGvecx*16;
+                planets[i].ay += deltaGvecy*16;
+            }
+        }
         function accelerate(delta){
             for(var i=0, l=planets.length; i<l; i++){
                 planets[i].accelerate(delta);
@@ -189,13 +202,14 @@ $(function(){
             var steps = 2;
             var delta = 1/steps;
             for(var i=0; i<steps; i++){
+                gravity();
+                blackhole();
                 accelerate(delta);
                 collide(false);
                 border_collide();
                 inertia(delta);
                 collide(true);
                 border_collide_preserve_impulse();
-                gravity();
             }
             draw();
         }
@@ -220,7 +234,7 @@ $(function(){
             simulation.planets.push(new Planet(
                 x,
                 y,
-                Math.random() * 2 + 2
+                Math.random() * 2 + 4
             ));
         })[0];
     $('#paused').on( "click", function() {    
@@ -238,7 +252,7 @@ $(function(){
     canvas.width = window.innerWidth;
     canvas.height = window.innerHeight;
     var context = canvas.getContext('2d');
-    var num_planets = 16;
+    var num_planets = 512;
     var simulation = new Simulation(context);
     paused = false;
     simulation.start();
