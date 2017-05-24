@@ -19,16 +19,65 @@
 				z-index: -1;
 			}
 			#paused{
-				position: absolute;
-				top: 8px;
-				left: 16px;
-				transform: translateY(-50%); 
-				color: white;
+				border-radius: 8px;
+			    border: 1px outset yellow;
+			    background-color: yellow;
+			    height:32px;
+			    width:64px;
+			    cursor:pointer;
+			}
+			#sand {
+				border-radius: 4px;
+			    border: 1px outset brown;
+			    background-color: sandybrown;
+			    height:32px;
+			    width:64px;
+			    cursor:pointer;
+			}
+			#water {
+				border-radius: 4px;
+			    border: 1px outset darkblue;
+			    background-color: midnightblue;
+			    height:32px;
+			    width:64px;
+			    cursor:pointer;
+			}
+			#rock {
+				border-radius: 4px;
+			    border: 1px outset black;
+			    background-color: dimgrey;
+			    height:32px;
+			    width:64px;
+			    cursor:pointer;
+			}
+			#plant {
+				border-radius: 4px;
+			    border: 1px outset green;
+			    background-color: yellowgreen;
+			    height:32px;
+			    width:64px;
+			    cursor:pointer;
+			}
+			#palette {
+				border-radius: 4px;
+			    border: 1px outset lightgrey;
+			    background-color: sandybrown;
+			    height:32px;
+			    width:32px;
+			    cursor:pointer;
+			}
+			.butt:hover {
+			    color:white;
 			}
 	</style>
 	</head>
 	<body>
 		<canvas id='canvas' height="480" width="640"></canvas>
-		<h1 id='paused'>▶</h1>
+		<input class="butt" id="paused" type="button" value="pause"/>
+		<input class="butt" id="sand" type="button" value="sand"/>
+		<input class="butt" id="water" type="button" value="water"/>
+		<input class="butt" id="rock" type="button" value="rock"/>
+		<input class="butt" id="plant" type="button" value="plant"/>
+		<input class="butt" id="palette" type="button" value=" "/>
 	</body>
 </html>

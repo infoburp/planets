@@ -1,13 +1,39 @@
 $(function(){
-    function Planet(x, y, radius){
+    function Planet(x, y, type){
         this.x = x;
         this.y = y;
         this.px = x;
         this.py = y;
         this.ax = 0;
         this.ay = 0;
-        this.radius = radius;
-        this.mass = Math.PI * radius * radius;
+        switch (type){
+            case 'sand':
+                this.density = 1;
+                this.radius = 1;
+                this.color = 'sandybrown';
+                break;
+            case 'rock':
+                this.density = 1.5;
+                this.radius = 1;
+                this.color = 'dimgrey';
+                break;
+            case 'water':
+                this.density = 0.8;
+                this.radius = 1;
+                this.color = 'midnightblue';
+                break;
+            case 'plant':
+                this.density = 0.7;
+                this.radius = 1;
+                this.color = 'yellowgreen';
+                break;
+            case 'gas':
+                this.density = 0.3;
+                this.radius = 1;
+                this.color = 'skyblue'
+                break;
+        }
+        this.mass = (Math.PI * this.radius * this.radius) * this.density;
     }
     Planet.prototype = {
         accelerate: function(delta){
@@ -26,6 +52,7 @@ $(function(){
         },
         draw: function(context){
             context.beginPath();
+            context.fillStyle = this.color;
             context.arc(this.x, this.y, this.radius, 0, Math.PI*2, false);
             context.fill();
         },
@@ -37,11 +64,23 @@ $(function(){
         var damping = 0.01;
         var interval;
         while(planets.length < num_planets){
-            var planet = new Planet(
-                Math.random() * (context.canvas.width-50) + 25,
-                Math.random() * (context.canvas.height-50) + 25,
-                1/*Math.random() * 2 + 3*/
-            );
+            random = Math.random();
+            if (random>0.7)
+                var type='sand';
+            else if (random>0.25&&random<=0.7)
+                var type='rock';
+            else if (random>0.05&&random<=0.25)
+                var type='water';
+            else if (random<=0.05)
+                var type='plant';
+            var x0 = context.canvas.width/2;
+            var y0 = context.canvas.height/2;
+            var x = Math.random() * (context.canvas.width-50);
+            var y = Math.random() * (context.canvas.height-50);
+            //d=Math.sqrt((x1−x0)2+(y1−y0)2)
+
+            //if (x>250 && x<context.canvas.width-250 && y>200 && y<context.canvas.height-200)
+                var planet = new Planet(x,y,type);
             var collides = false;
             for(var i=0, l=planets.length; i<l; i++){
                 var other = planets[i];
@@ -179,13 +218,13 @@ $(function(){
             for(i=0;i<planets.length;i++){
             //gravity interaction
                 distance = Math.round(distanceBetween(planets[i].x,planets[i].y,canvas.width/2,canvas.height/2)*100)/100 + 100;
-                gravityConst = planets[i].mass * planets[i].mass/(distance * distance);
+                gravityConst = (planets[i].mass * 4) * (planets[i].mass * 4)/(distance * distance);
                 newGvecx = canvas.width/2 - planets[i].x;
                 newGvecy = canvas.height/2 - planets[i].y;
                 deltaGvecx = setToFixedVelocity(newGvecx ,newGvecy, gravityConst).x;
                 deltaGvecy = setToFixedVelocity(newGvecx ,newGvecy, gravityConst).y;
-                planets[i].ax += deltaGvecx*16;
-                planets[i].ay += deltaGvecy*16;
+                planets[i].ax += deltaGvecx;
+                planets[i].ay += deltaGvecy;
             }
         }
         function accelerate(delta){
@@ -203,12 +242,12 @@ $(function(){
             var delta = 1/steps;
             for(var i=0; i<steps; i++){
                 gravity();
-                blackhole();
                 accelerate(delta);
+                blackhole();
                 collide(false);
                 border_collide();
                 inertia(delta);
-                collide(true);
+                collide(false);//true);
                 border_collide_preserve_impulse();
             }
             draw();
@@ -234,9 +273,10 @@ $(function(){
             simulation.planets.push(new Planet(
                 x,
                 y,
-                Math.random() * 2 + 4
+                palette
             ));
         })[0];
+    canvas.style.cursor='crosshair';
     $('#paused').on( "click", function() {    
         if (paused == false)
         {
@@ -249,9 +289,26 @@ $(function(){
             paused = false;
         }
     });
+    $('#sand').on( "click", function() {
+        palette = 'sand';
+        $('#palette').css("background-color","sandybrown");
+    });
+    $('#water').on( "click", function() {
+        palette = 'water'
+        $('#palette').css("background-color","midnightblue");
+    });
+    $('#rock').on( "click", function() {
+        palette = 'rock'
+        $('#palette').css("background-color","dimgrey");
+    });
+    $('#plant').on( "click", function() {
+        palette = 'plant'
+        $('#palette').css("background-color","yellowgreen");
+    });
     canvas.width = window.innerWidth;
     canvas.height = window.innerHeight;
     var context = canvas.getContext('2d');
+    var palette = 'sand';
     var num_planets = 512;
     var simulation = new Simulation(context);
     paused = false;
