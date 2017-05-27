@@ -475,7 +475,7 @@ $(function(){
     canvas.height = window.innerHeight;
     var context = canvas.getContext('2d');
     var palette = 'sand';
-    var num_planets = 1200;
+    var num_planets = 1024;
     var spawn_radius = Math.min(canvas.width/2,canvas.height/2) - 128;
     var simulation = new Simulation(context);
     paused = false;
