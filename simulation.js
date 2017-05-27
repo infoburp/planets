@@ -6,6 +6,7 @@ $(function(){
         this.py = y;
         this.ax = 0;
         this.ay = 0;
+        this.type = type;
         switch (type){
             case 'sand':
                 this.density = 1;
@@ -28,7 +29,7 @@ $(function(){
                 this.color = 'yellowgreen';
                 break;
             case 'gas':
-                this.density = 0.3;
+                this.density = 0.1;
                 this.radius = 1;
                 this.color = 'skyblue'
                 break;
@@ -65,9 +66,9 @@ $(function(){
         var interval;
         while(planets.length < num_planets){
             random = Math.random();
-            if (random>0.7)
+            if (random>0.6)
                 var type='sand';
-            else if (random>0.25&&random<=0.7)
+            else if (random>0.25&&random<=0.6)
                 var type='rock';
             else if (random>0.05&&random<=0.25)
                 var type='water';
@@ -75,8 +76,12 @@ $(function(){
                 var type='plant';
             var x0 = context.canvas.width/2;
             var y0 = context.canvas.height/2;
-            var x = Math.random() * (context.canvas.width-50);
-            var y = Math.random() * (context.canvas.height-50);
+            var a=2*Math.PI*Math.random()
+            var r=Math.sqrt(Math.random())
+            var x=(spawn_radius*r)*Math.cos(a)+x0
+            var y=(spawn_radius*r)*Math.sin(a)+y0
+            //var x = Math.random() * (context.canvas.width-50);
+            //var y = Math.random() * (context.canvas.height-50);
             //d=Math.sqrt((x1−x0)2+(y1−y0)2)
 
             //if (x>250 && x<context.canvas.width-250 && y>200 && y<context.canvas.height-200)
@@ -120,10 +125,43 @@ $(function(){
                         var v2x = planet2.x - planet2.px;
                         var v2y = planet2.y - planet2.py;
                         var factor = (length-target)/length;
-                        planet1.x -= x*factor*0.5;
-                        planet1.y -= y*factor*0.5;
-                        planet2.x += x*factor*0.5;
-                        planet2.y += y*factor*0.5;
+
+                        if (planet1.mass>planet2.mass){
+                            planet1.x -= x*factor*0.5;
+                            planet1.y -= y*factor*0.5;
+                            planet2.x += (x*factor*0.5)*0.9;
+                            planet2.y += (y*factor*0.5)*0.9;
+                        }
+                        else if (planet1.mass<planet2.mass){
+                            planet1.x -= (x*factor*0.5)*0.9;
+                            planet1.y -= (y*factor*0.5)*0.9;
+                            planet2.x += x*factor*0.5;
+                            planet2.y += y*factor*0.5;
+                        }
+                        else{
+                            planet1.x -= x*factor*0.5;
+                            planet1.y -= y*factor*0.5;
+                            planet2.x += x*factor*0.5;
+                            planet2.y += y*factor*0.5;
+                        }
+
+                        /*if (planet1.mass>planet2.mass){
+                            tempx = planet1.x;
+                            tempy = planet1.y;
+                            planet1.x = planet2.x;
+                            planet1.y = planet2.y;
+                            planet2.x = tempx;
+                            planet2.y = tempy;
+                        }
+                        else if (planet1.mass<planet2.mass){
+                            tempx = planet2.x;
+                            tempy = planet2.y;
+                            planet2.x = planet1.x;
+                            planet2.y = planet1.y;
+                            planet1.x = tempx;
+                            planet1.y = tempy;
+                        }*/
+
                         if(preserve_impulse){
                             var f1 = (damping*(x*v1x+y*v1y))/slength;
                             var f2 = (damping*(x*v2x+y*v2y))/slength;
@@ -135,6 +173,108 @@ $(function(){
                             planet1.py = planet1.y - v1y;
                             planet2.px = planet2.x - v2x;
                             planet2.py = planet2.y - v2y;
+                        }
+                    }
+                }
+            }
+        }
+        function density(preserve_impulse){
+            for(var i=0, l=planets.length; i<l; i++){
+                var planet1 = planets[i];
+                for(var j=i+1; j<l; j++){
+                    var planet2 = planets[j];
+                    var x = planet1.x - planet2.x;
+                    var y = planet1.y - planet2.y;
+                    var slength = x*x+y*y;
+                    var length = Math.sqrt(slength);
+                    var target = 2;
+                    if(length < target){
+                        var v1x = planet1.x - planet1.px;
+                        var v1y = planet1.y - planet1.py;
+                        var v2x = planet2.x - planet2.px;
+                        var v2y = planet2.y - planet2.py;
+                        var factor = (length-target)/length;
+                        var max_vel = 0.1;
+                        if(planet1.ax < max_vel && planet1.ay < max_vel && planet2.ax < max_vel && planet2.ay < max_vel){
+
+                        
+                            if (planet1.mass>planet2.mass){
+                                //planet1 is more massive so move it inwards
+                                //which one is closest to the middle?
+                                var x = planet1.x - (canvas.width/2);
+                                var y = planet1.y - (canvas.height/2);
+                                var slength = x*x+y*y;
+                                var length1 = Math.sqrt(slength);
+                                var x = planet2.x - (canvas.width/2);
+                                var y = planet2.y - (canvas.height/2);
+                                var slength = x*x+y*y;
+                                var length2 = Math.sqrt(slength);
+                                if (length1<length2){
+                                    tempx = planet1.x;
+                                    tempy = planet1.y;
+                                    planet1.x = planet2.x;
+                                    planet1.y = planet2.y;
+                                    planet2.x = tempx;
+                                    planet2.y = tempy;
+                                }
+                                else{
+                                    tempx = planet2.x;
+                                    tempy = planet2.y;
+                                    planet2.x = planet1.x;
+                                    planet2.y = planet1.y;
+                                    planet1.x = tempx;
+                                    planet1.y = tempy;
+                                }
+                            }
+                            else if (planet1.mass<planet2.mass){
+                                //planet1 is less massive so move it outwards
+                                //which one is closest to the middle?
+                                var x = planet1.x - (canvas.width/2);
+                                var y = planet1.y - (canvas.height/2);
+                                var slength = x*x+y*y;
+                                var length1 = Math.sqrt(slength);
+                                var x = planet2.x - (canvas.width/2);
+                                var y = planet2.y - (canvas.height/2);
+                                var slength = x*x+y*y;
+                                var length2 = Math.sqrt(slength);
+                                if (length1<length2){
+                                    //planet1 is closer to the middle
+                                    tempx = planet2.x;
+                                    tempy = planet2.y;
+                                    planet2.x = planet1.x;
+                                    planet2.y = planet1.y;
+                                    planet1.x = tempx;
+                                    planet1.y = tempy;
+                                }
+                                else{
+                                    //planet2 is closer to the middle
+                                    tempx = planet1.x;
+                                    tempy = planet1.y;
+                                    planet1.x = planet2.x;
+                                    planet1.y = planet2.y;
+                                    planet2.x = tempx;
+                                    planet2.y = tempy;
+                                }
+                                tempx = planet2.x;
+                                tempy = planet2.y;
+                                planet2.x = planet1.x;
+                                planet2.y = planet1.y;
+                                planet1.x = tempx;
+                                planet1.y = tempy;
+                            }
+
+                            if(preserve_impulse){
+                                var f1 = (damping*(x*v1x+y*v1y))/slength;
+                                var f2 = (damping*(x*v2x+y*v2y))/slength;
+                                v1x += f2*x-f1*x;
+                                v2x += f1*x-f2*x;
+                                v1y += f2*y-f1*y;
+                                v2y += f1*y-f2*y;
+                                planet1.px = planet1.x - v1x;
+                                planet1.py = planet1.y - v1y;
+                                planet2.px = planet2.x - v2x;
+                                planet2.py = planet2.y - v2y;
+                            }
                         }
                     }
                 }
@@ -203,13 +343,15 @@ $(function(){
                     //gravity interaction
                     if(i != a){
                         distance = Math.round(distanceBetween(planets[i].x,planets[i].y,planets[a].x,planets[a].y)*100)/100 + 100;
-                        gravityConst = planets[i].mass * planets[i].mass/(distance * distance);
-                        newGvecx = planets[a].x - planets[i].x;
-                        newGvecy = planets[a].y - planets[i].y;
-                        deltaGvecx = setToFixedVelocity(newGvecx ,newGvecy, gravityConst).x;
-                        deltaGvecy = setToFixedVelocity(newGvecx ,newGvecy, gravityConst).y;
-                        planets[i].ax += deltaGvecx;
-                        planets[i].ay += deltaGvecy;
+                        if (distance<20){
+                            gravityConst = planets[i].mass * planets[i].mass/(distance * distance);
+                            newGvecx = planets[a].x - planets[i].x;
+                            newGvecy = planets[a].y - planets[i].y;
+                            deltaGvecx = setToFixedVelocity(newGvecx ,newGvecy, gravityConst).x;
+                            deltaGvecy = setToFixedVelocity(newGvecx ,newGvecy, gravityConst).y;
+                            planets[i].ax += deltaGvecx;
+                            planets[i].ay += deltaGvecy;
+                        }
                     }
                 }
             }
@@ -225,6 +367,19 @@ $(function(){
                 deltaGvecy = setToFixedVelocity(newGvecx ,newGvecy, gravityConst).y;
                 planets[i].ax += deltaGvecx;
                 planets[i].ay += deltaGvecy;
+            }
+        }
+        function calm(){
+            for(i=0;i<planets.length;i++){
+            //gravity interaction
+                distance = Math.round(distanceBetween(planets[i].x,planets[i].y,canvas.width/2,canvas.height/2)*100)/100 + 100;
+                //gravityConst = (planets[i].mass * 200) * (planets[i].mass * 200)/(distance * distance);
+                //newGvecx = canvas.width/2 - planets[i].x;
+                //newGvecy = canvas.height/2 - planets[i].y;
+                //deltaGvecx = setToFixedVelocity(newGvecx ,newGvecy, gravityConst).x;
+                //deltaGvecy = setToFixedVelocity(newGvecx ,newGvecy, gravityConst).y;
+                planets[i].ax *= 1/Math.pow(distance,2);
+                planets[i].ay *= 1/Math.pow(distance,2);
             }
         }
         function accelerate(delta){
@@ -244,9 +399,11 @@ $(function(){
                 gravity();
                 accelerate(delta);
                 blackhole();
+                
                 collide(false);
                 border_collide();
                 inertia(delta);
+                density(false);
                 collide(false);//true);
                 border_collide_preserve_impulse();
             }
@@ -309,7 +466,8 @@ $(function(){
     canvas.height = window.innerHeight;
     var context = canvas.getContext('2d');
     var palette = 'sand';
-    var num_planets = 512;
+    var num_planets = 1024;
+    var spawn_radius = Math.min(canvas.width/2,canvas.height/2) - 128;
     var simulation = new Simulation(context);
     paused = false;
     simulation.start();
