@@ -35,11 +35,17 @@ $(function(){
                 break;
         }
         this.mass = (Math.PI * this.radius * this.radius) * this.density;
+        this.paused = false;
     }
     Planet.prototype = {
         accelerate: function(delta){
-            this.x += this.ax * delta * delta;
-            this.y += this.ay * delta * delta;
+            if (this.paused == false){
+                this.x += this.ax * delta * delta;
+                this.y += this.ay * delta * delta;
+            }
+            else{
+                this.paused == false
+            }
             this.ax = 0;
             this.ay = 0;
         },
@@ -80,8 +86,8 @@ $(function(){
             var r=Math.sqrt(Math.random())
             var x=(spawn_radius*r)*Math.cos(a)+x0
             var y=(spawn_radius*r)*Math.sin(a)+y0
-            //var x = Math.random() * (context.canvas.width-50);
-            //var y = Math.random() * (context.canvas.height-50);
+            var x = Math.random() * (context.canvas.width-50);
+            var y = Math.random() * (context.canvas.height-50);
             //d=Math.sqrt((x1−x0)2+(y1−y0)2)
 
             //if (x>250 && x<context.canvas.width-250 && y>200 && y<context.canvas.height-200)
@@ -127,18 +133,21 @@ $(function(){
                         var factor = (length-target)/length;
 
                         if (planet1.mass>planet2.mass){
+                            //swap(planet1,planet2);
                             planet1.x -= x*factor*0.5;
                             planet1.y -= y*factor*0.5;
                             planet2.x += (x*factor*0.5)*0.9;
                             planet2.y += (y*factor*0.5)*0.9;
                         }
                         else if (planet1.mass<planet2.mass){
+                            //swap(planet2,planet1)
                             planet1.x -= (x*factor*0.5)*0.9;
                             planet1.y -= (y*factor*0.5)*0.9;
                             planet2.x += x*factor*0.5;
                             planet2.y += y*factor*0.5;
                         }
                         else{
+                            //swap(planet1,planet2)
                             planet1.x -= x*factor*0.5;
                             planet1.y -= y*factor*0.5;
                             planet2.x += x*factor*0.5;
@@ -187,17 +196,17 @@ $(function(){
                     var y = planet1.y - planet2.y;
                     var slength = x*x+y*y;
                     var length = Math.sqrt(slength);
-                    var target = 2;
-                    if(length < target){
+                    var target = 1.9;    
+                    if(length <= target){
+                        
                         var v1x = planet1.x - planet1.px;
                         var v1y = planet1.y - planet1.py;
                         var v2x = planet2.x - planet2.px;
                         var v2y = planet2.y - planet2.py;
                         var factor = (length-target)/length;
-                        var max_vel = 0.1;
-                        if(planet1.ax < max_vel && planet1.ay < max_vel && planet2.ax < max_vel && planet2.ay < max_vel){
+                        var max_vel = 0.003;
+                        if(planet1.ax <= max_vel && planet1.ay <= max_vel && planet2.ax <= max_vel && planet2.ay <= max_vel){
 
-                        
                             if (planet1.mass>planet2.mass){
                                 //planet1 is more massive so move it inwards
                                 //which one is closest to the middle?
@@ -209,22 +218,16 @@ $(function(){
                                 var y = planet2.y - (canvas.height/2);
                                 var slength = x*x+y*y;
                                 var length2 = Math.sqrt(slength);
+                                
                                 if (length1<length2){
-                                    tempx = planet1.x;
-                                    tempy = planet1.y;
-                                    planet1.x = planet2.x;
-                                    planet1.y = planet2.y;
-                                    planet2.x = tempx;
-                                    planet2.y = tempy;
+                                    console.log(planet1.ax,planet1.ay)
+                                    swap(planet1,planet2);
                                 }
                                 else{
-                                    tempx = planet2.x;
-                                    tempy = planet2.y;
-                                    planet2.x = planet1.x;
-                                    planet2.y = planet1.y;
-                                    planet1.x = tempx;
-                                    planet1.y = tempy;
+                                    swap(planet2,planet1);
+                                    console.log(planet1.ax,planet1.ay)
                                 }
+                                
                             }
                             else if (planet1.mass<planet2.mass){
                                 //planet1 is less massive so move it outwards
@@ -237,48 +240,66 @@ $(function(){
                                 var y = planet2.y - (canvas.height/2);
                                 var slength = x*x+y*y;
                                 var length2 = Math.sqrt(slength);
+                                
                                 if (length1<length2){
                                     //planet1 is closer to the middle
-                                    tempx = planet2.x;
-                                    tempy = planet2.y;
-                                    planet2.x = planet1.x;
-                                    planet2.y = planet1.y;
-                                    planet1.x = tempx;
-                                    planet1.y = tempy;
+                                    console.log(planet1.ax,planet1.ay,length)
+                                    swap(planet2,planet1);
                                 }
                                 else{
                                     //planet2 is closer to the middle
-                                    tempx = planet1.x;
-                                    tempy = planet1.y;
-                                    planet1.x = planet2.x;
-                                    planet1.y = planet2.y;
-                                    planet2.x = tempx;
-                                    planet2.y = tempy;
+                                    console.log(planet1.ax,planet1.ay,length)
+                                    swap(planet1,planet2);
                                 }
-                                tempx = planet2.x;
-                                tempy = planet2.y;
-                                planet2.x = planet1.x;
-                                planet2.y = planet1.y;
-                                planet1.x = tempx;
-                                planet1.y = tempy;
+                                
                             }
 
-                            if(preserve_impulse){
-                                var f1 = (damping*(x*v1x+y*v1y))/slength;
-                                var f2 = (damping*(x*v2x+y*v2y))/slength;
-                                v1x += f2*x-f1*x;
-                                v2x += f1*x-f2*x;
-                                v1y += f2*y-f1*y;
-                                v2y += f1*y-f2*y;
-                                planet1.px = planet1.x - v1x;
-                                planet1.py = planet1.y - v1y;
-                                planet2.px = planet2.x - v2x;
-                                planet2.py = planet2.y - v2y;
-                            }
+                            
                         }
                     }
                 }
             }
+        }
+        function swap(planet1,planet2){
+            var newx1 = planet2.x;
+            var newy1 = planet2.y;
+            var newx2 = planet1.x;
+            var newy2 = planet1.y;
+            var newax1 = planet2.ax;
+            var neway1 = planet2.ay;
+            var newax2 = planet1.ax;
+            var neway2 = planet1.ay;
+            var collides = false;
+            if (planet1.paused != true && planet2.paused != true){
+                for(var i=0, l=planets.length; i<l; i++){
+                    var other = planets[i];
+                    if (planets[i] == planet2 || planets[i] == planet1)
+                        continue;
+                    var x = other.x - planet1.x;
+                    var y = other.y - planet1.y;
+
+                    var length = Math.sqrt(x*x+y*y);
+                    if(length < other.radius + planet1.radius){
+                        collides = true;
+                        break;
+                    }
+                }
+                if (!collides){
+                    planet1.x = newx1;
+                    planet1.y = newy1;
+                    planet1.ax = planet1.ax / 4;//newax1;
+                    planet1.ay = planet1.ay / 4;//neway1;
+                    planet2.x = newx2;
+                    planet2.y = newy2;
+                    planet2.ax = planet2.ax / 4;//newax2;
+                    planet2.ay = planet2.ay / 4;//neway2;
+                    console.log(planet2.ax,planet2.ay)
+                    planet1.paused = true;
+                    planet2.paused = true;
+
+                }
+            }
+
         }
         function border_collide_preserve_impulse(){
             for(var i=0, l=planets.length; i<l; i++){
@@ -369,19 +390,6 @@ $(function(){
                 planets[i].ay += deltaGvecy;
             }
         }
-        function calm(){
-            for(i=0;i<planets.length;i++){
-            //gravity interaction
-                distance = Math.round(distanceBetween(planets[i].x,planets[i].y,canvas.width/2,canvas.height/2)*100)/100 + 100;
-                //gravityConst = (planets[i].mass * 200) * (planets[i].mass * 200)/(distance * distance);
-                //newGvecx = canvas.width/2 - planets[i].x;
-                //newGvecy = canvas.height/2 - planets[i].y;
-                //deltaGvecx = setToFixedVelocity(newGvecx ,newGvecy, gravityConst).x;
-                //deltaGvecy = setToFixedVelocity(newGvecx ,newGvecy, gravityConst).y;
-                planets[i].ax *= 1/Math.pow(distance,2);
-                planets[i].ay *= 1/Math.pow(distance,2);
-            }
-        }
         function accelerate(delta){
             for(var i=0, l=planets.length; i<l; i++){
                 planets[i].accelerate(delta);
@@ -396,16 +404,17 @@ $(function(){
             var steps = 2;
             var delta = 1/steps;
             for(var i=0; i<steps; i++){
-                gravity();
-                accelerate(delta);
-                blackhole();
                 
+                gravity();
+                blackhole();
                 collide(false);
-                border_collide();
                 inertia(delta);
-                density(false);
-                collide(false);//true);
                 border_collide_preserve_impulse();
+                //density(true);
+                border_collide();
+                collide(true);//true);
+                accelerate(delta);
+                
             }
             draw();
         }
@@ -466,7 +475,7 @@ $(function(){
     canvas.height = window.innerHeight;
     var context = canvas.getContext('2d');
     var palette = 'sand';
-    var num_planets = 1024;
+    var num_planets = 1200;
     var spawn_radius = Math.min(canvas.width/2,canvas.height/2) - 128;
     var simulation = new Simulation(context);
     paused = false;
