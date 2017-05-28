@@ -123,24 +123,10 @@ $(function(){
                     var target = planet1.radius + planet2.radius;
                     if(length < target){
                         var factor = (length-target)/length;
-                        if (planet1.mass>planet2.mass){
-                            planet1.x -= (x*factor*0.5)*0.2;
-                            planet1.y -= (y*factor*0.5)*0.2;
-                            planet2.x += x*factor*0.5;
-                            planet2.y += y*factor*0.5;
-                        }
-                        else if (planet1.mass<planet2.mass){
-                            planet1.x -= x*factor*0.5;
-                            planet1.y -= y*factor*0.5;
-                            planet2.x += (x*factor*0.5)*0.2;
-                            planet2.y += (y*factor*0.5)*0.2;
-                        }
-                        else{
-                            planet1.x -= x*factor*0.5;
-                            planet1.y -= y*factor*0.5;
-                            planet2.x += x*factor*0.5;
-                            planet2.y += y*factor*0.5;
-                        }
+                        planet1.x -= x*factor*0.5*(1/planet1.mass);
+                        planet1.y -= y*factor*0.5*(1/planet1.mass);
+                        planet2.x += x*factor*0.5*(1/planet2.mass);
+                        planet2.y += y*factor*0.5*(1/planet2.mass);
                         if(preserve_impulse){
                             var v1x = planet1.x - planet1.px;
                             var v1y = planet1.y - planet1.py;
@@ -342,10 +328,7 @@ $(function(){
     canvas.onmousemove = handleMouseMove;
     function handleMouseMove(event) {
         var dot, eventDoc, doc, body, pageX, pageY;
-        event = event || window.event; // IE-ism
-        // If pageX/Y aren't available and clientX/Y are,
-        // calculate pageX/Y - logic taken from jQuery.
-        // (This is to support old IE)
+        event = event || window.event;
         if (event.pageX == null && event.clientX != null) {
             eventDoc = (event.target && event.target.ownerDocument) || document;
             doc = eventDoc.documentElement;
